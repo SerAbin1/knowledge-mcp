@@ -12,8 +12,8 @@ describe("ingestPortfolio", () => {
   it("indexes posts, projects and experience, and skips unchanged ones next time", async () => {
     const db = createTestDb();
     serve(portfolio);
-    expect(await ingestPortfolio(db, "http://test/content.json")).toEqual({ total: 10, changed: 10, removed: 0 });
-    expect(await ingestPortfolio(db, "http://test/content.json")).toEqual({ total: 10, changed: 0, removed: 0 });
+    expect(await ingestPortfolio(db, "http://test/content.json")).toMatchObject({ total: 10, changed: 10, removed: 0 });
+    expect(await ingestPortfolio(db, "http://test/content.json")).toMatchObject({ total: 10, changed: 0, removed: 0 });
   });
 
   it("removes a post that is no longer published, along with its chunks", async () => {

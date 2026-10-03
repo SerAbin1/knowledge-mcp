@@ -1,4 +1,4 @@
-import { deleteMissing, upsertDocument, type DocumentInput } from "../store";
+import { deleteMissing, syncDocuments, type DocumentInput } from "../store";
 import { chunkMarkdown } from "./chunk";
 
 // Shape of serabin1.github.io/content.json (src/pages/content.json.ts there).
@@ -59,10 +59,10 @@ export async function ingestPortfolio(db: D1Database, contentUrl: string) {
   if (!res.ok) throw new Error(`portfolio: GET ${contentUrl} → ${res.status}`);
   const items = portfolioDocuments(await res.json());
 
-  let changed = 0;
-  for (const { doc, markdown } of items) {
-    if (await upsertDocument(db, doc, chunkMarkdown(markdown))) changed++;
-  }
+  const changed = await syncDocuments(
+    db,
+    items.map(({ doc, markdown }) => ({ doc, chunks: chunkMarkdown(markdown) })),
+  );
   const removed = await deleteMissing(db, ["blog", "project", "experience"], items.map((i) => i.doc.url));
-  return { total: items.length, changed, removed };
+  return { total: items.length, changed: changed.length, removed, changedIds: changed };
 }

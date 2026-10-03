@@ -11,6 +11,7 @@ export type DocumentInput = {
   summary: string | null;
   body: string | null;
   publishedAt: string | null;
+  feedUrl?: string;
 };
 
 export type DocumentRow = {
@@ -24,34 +25,67 @@ export type DocumentRow = {
   published_at: string | null;
 };
 
-// Inserts or updates a document and replaces its chunks. Returns false (and
-// writes nothing) when the content is unchanged, so callers can skip
-// downstream work such as embedding.
-export async function upsertDocument(db: D1Database, doc: DocumentInput, chunks: Chunk[]): Promise<boolean> {
-  const id = await documentId(doc.url);
-  const hash = await sha256Hex(JSON.stringify([doc, chunks]));
-  const existing = await db.prepare("SELECT content_hash FROM document WHERE id = ?").bind(id).first<{ content_hash: string }>();
-  if (existing?.content_hash === hash) return false;
+export type Item = { doc: DocumentInput; chunks: Chunk[] };
+
+// D1 caps bound parameters per statement at 100.
+const MAX_PARAMS = 90;
+
+// Writes new or changed documents and replaces their chunks, all in one D1
+// batch. Unchanged documents (same content hash) are skipped, and their ids
+// are not returned, so callers can limit downstream work such as embedding to
+// what actually changed. One read + one batch keeps an ingest run well inside
+// the Workers per-invocation query limit.
+export async function syncDocuments(db: D1Database, items: Item[]): Promise<string[]> {
+  if (!items.length) return [];
+  const rows = await Promise.all(
+    items.map(async ({ doc, chunks }) => ({
+      id: await documentId(doc.url),
+      hash: await sha256Hex(JSON.stringify([doc, chunks])),
+      doc,
+      chunks,
+    })),
+  );
+
+  const existing = new Map<string, string>();
+  for (let i = 0; i < rows.length; i += MAX_PARAMS) {
+    const ids = rows.slice(i, i + MAX_PARAMS).map((r) => r.id);
+    const { results } = await db
+      .prepare(`SELECT id, content_hash FROM document WHERE id IN (${ids.map(() => "?").join(",")})`)
+      .bind(...ids)
+      .all<{ id: string; content_hash: string }>();
+    for (const r of results) existing.set(r.id, r.content_hash);
+  }
+
+  const seen = new Set<string>();
+  const changed = rows.filter((r) => {
+    if (seen.has(r.id) || existing.get(r.id) === r.hash) return false;
+    seen.add(r.id);
+    return true;
+  });
+  if (!changed.length) return [];
 
   const now = new Date().toISOString();
-  await db.batch([
-    db
-      .prepare(
-        `INSERT INTO document (id, kind, source, url, title, summary, body, published_at, content_hash, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(id) DO UPDATE SET kind = excluded.kind, source = excluded.source, title = excluded.title,
-           summary = excluded.summary, body = excluded.body, published_at = excluded.published_at,
-           content_hash = excluded.content_hash, updated_at = excluded.updated_at`,
-      )
-      .bind(id, doc.kind, doc.source, doc.url, doc.title, doc.summary, doc.body, doc.publishedAt, hash, now),
-    db.prepare("DELETE FROM chunk WHERE document_id = ?").bind(id),
-    ...chunks.map((c, idx) =>
+  await db.batch(
+    changed.flatMap(({ id, hash, doc, chunks }) => [
       db
-        .prepare("INSERT INTO chunk (id, document_id, idx, title, heading, text) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(`${id}:${idx}`, id, idx, doc.title, c.heading, c.text),
-    ),
-  ]);
-  return true;
+        .prepare(
+          `INSERT INTO document (id, kind, source, url, title, summary, body, published_at, content_hash, updated_at, feed_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET kind = excluded.kind, source = excluded.source, title = excluded.title,
+             summary = excluded.summary, body = COALESCE(excluded.body, document.body),
+             published_at = excluded.published_at, content_hash = excluded.content_hash,
+             updated_at = excluded.updated_at, feed_url = excluded.feed_url`,
+        )
+        .bind(id, doc.kind, doc.source, doc.url, doc.title, doc.summary, doc.body, doc.publishedAt, hash, now, doc.feedUrl ?? null),
+      db.prepare("DELETE FROM chunk WHERE document_id = ?").bind(id),
+      ...chunks.map((c, idx) =>
+        db
+          .prepare("INSERT INTO chunk (id, document_id, idx, title, heading, text) VALUES (?, ?, ?, ?, ?, ?)")
+          .bind(`${id}:${idx}`, id, idx, doc.title, c.heading, c.text),
+      ),
+    ]),
+  );
+  return changed.map((r) => r.id);
 }
 
 // Removes documents of the given kinds whose URL is no longer published, e.g.

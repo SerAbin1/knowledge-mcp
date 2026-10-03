@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { Env } from "./env";
+import { ingestFeeds, syncFeedList } from "./ingest/feeds";
 import { ingestPortfolio } from "./ingest/portfolio";
 import { createServer } from "./server";
 
@@ -23,8 +24,19 @@ export default {
   },
 
   // Cron trigger (see wrangler.toml): refreshes the index from the sources.
+  // Stages run independently so one failing source doesn't block the others.
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    const portfolio = await ingestPortfolio(env.DB, env.PORTFOLIO_CONTENT_URL);
-    console.log("ingest", JSON.stringify({ portfolio }));
+    const report: Record<string, unknown> = {};
+    const stage = async (name: string, run: () => Promise<unknown>) => {
+      try {
+        report[name] = await run();
+      } catch (e) {
+        report[name] = { error: e instanceof Error ? e.message : String(e) };
+      }
+    };
+    await stage("portfolio", () => ingestPortfolio(env.DB, env.PORTFOLIO_CONTENT_URL));
+    await stage("feedList", () => syncFeedList(env.DB, env.CURATED_OPML_URL, env.PORTFOLIO_HOST));
+    await stage("feeds", () => ingestFeeds(env.DB));
+    console.log("ingest", JSON.stringify(report, (k, v) => (k === "changedIds" ? v.length : v)));
   },
 } satisfies ExportedHandler<Env>;

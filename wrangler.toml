@@ -7,13 +7,15 @@ main = "src/index.ts"
 # deliberate opt-in to newer semantics.
 compatibility_date = "2026-09-25"
 
-# Refresh the index hourly. Locally: `pnpm dev --test-scheduled`, then
+# Refresh the index every 30 minutes (each run refreshes a slice of the feeds). Locally: `pnpm dev --test-scheduled`, then
 # `curl localhost:8787/__scheduled`.
 [triggers]
-crons = ["0 * * * *"]
+crons = ["*/30 * * * *"]
 
 [vars]
 PORTFOLIO_CONTENT_URL = "https://serabin1.github.io/content.json"
+PORTFOLIO_HOST = "serabin1.github.io"
+CURATED_OPML_URL = "https://my-rss-reader.pages.dev/curated-feeds.opml"
 
 # Documents, chunks and the FTS5 keyword index. Local dev uses a Miniflare
 # sqlite under .wrangler/; `pnpm d1:migrate` creates the tables there.
