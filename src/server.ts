@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Env } from "./env";
+import { loadArticleBody } from "./fetch/article";
 import { hybridSearch } from "./search/hybrid";
 import { getDocument, listDocuments, listSources } from "./store";
 
@@ -76,12 +77,24 @@ export function createServer(env: Env): McpServer {
     async ({ id }) => {
       const doc = await getDocument(env.DB, id);
       if (!doc) return { ...json({ error: `No document with id ${id}` }), isError: true };
+
+      // Feed articles are indexed by summary only; the full text is fetched
+      // from the original site the first time someone reads it, then cached.
+      let text = doc.body;
+      let note: string | undefined;
+      if (text == null && doc.kind === "article") {
+        try {
+          text = await loadArticleBody(env.DB, doc);
+        } catch (e) {
+          note = `Full text unavailable (${e instanceof Error ? e.message : e}); this is the feed summary. Read the original at the url.`;
+        }
+      }
       return json({
         id: doc.id,
         title: doc.title,
         url: doc.url,
-        text: doc.body ?? doc.summary ?? "",
-        metadata: { kind: doc.kind, source: doc.source, published: doc.published_at },
+        text: text ?? doc.summary ?? "",
+        metadata: { kind: doc.kind, source: doc.source, published: doc.published_at, ...(note && { note }) },
       });
     },
   );
