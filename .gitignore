@@ -1,0 +1,7 @@
+# dependencies
+node_modules/
+
+# wrangler local state (Miniflare sqlite from `wrangler dev`) and secrets
+.wrangler/
+.dev.vars
+.env

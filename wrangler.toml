@@ -1,0 +1,8 @@
+# Remote MCP server that lets AI assistants (ChatGPT, Claude) search my
+# trusted sources: the curated feeds in rss-reader and my own blog/portfolio.
+name = "knowledge-mcp"
+main = "src/index.ts"
+
+# The Workers runtime gates breaking changes behind this date. Bumping it is a
+# deliberate opt-in to newer semantics.
+compatibility_date = "2026-09-25"
