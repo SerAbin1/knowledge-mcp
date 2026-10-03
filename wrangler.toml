@@ -6,3 +6,19 @@ main = "src/index.ts"
 # The Workers runtime gates breaking changes behind this date. Bumping it is a
 # deliberate opt-in to newer semantics.
 compatibility_date = "2026-09-25"
+
+# Refresh the index hourly. Locally: `pnpm dev --test-scheduled`, then
+# `curl localhost:8787/__scheduled`.
+[triggers]
+crons = ["0 * * * *"]
+
+[vars]
+PORTFOLIO_CONTENT_URL = "https://serabin1.github.io/content.json"
+
+# Documents, chunks and the FTS5 keyword index. Local dev uses a Miniflare
+# sqlite under .wrangler/; `pnpm d1:migrate` creates the tables there.
+[[d1_databases]]
+binding = "DB"
+database_name = "knowledge-mcp"
+database_id = "local-only-until-first-deploy"
+migrations_dir = "migrations"

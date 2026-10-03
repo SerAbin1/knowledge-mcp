@@ -11,7 +11,9 @@
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "d1:migrate": "wrangler d1 migrations apply knowledge-mcp --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply knowledge-mcp --remote"
   },
   "packageManager": "pnpm@12.4.1",
   "dependencies": {
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261002.1",
+    "@types/node": "^26.6.4",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3",
     "wrangler": "^4.146.0"
