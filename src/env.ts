@@ -1,5 +1,10 @@
 export type Env = {
   DB: D1Database;
+  // Workers AI (embeddings) and Vectorize (vector index). Optional: they only
+  // exist on Cloudflare, not in local dev or tests, and without them search
+  // falls back to keyword-only.
+  AI?: Ai;
+  VECTORIZE?: Vectorize;
   // Where the portfolio publishes its full-content export.
   PORTFOLIO_CONTENT_URL: string;
   // The portfolio's host. Its RSS feed is in the curated OPML too, but it's

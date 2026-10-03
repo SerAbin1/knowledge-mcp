@@ -2,6 +2,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import type { Env } from "./env";
 import { ingestFeeds, syncFeedList } from "./ingest/feeds";
 import { ingestPortfolio } from "./ingest/portfolio";
+import { embedPending } from "./search/embed";
 import { createServer } from "./server";
 
 export default {
@@ -37,6 +38,10 @@ export default {
     await stage("portfolio", () => ingestPortfolio(env.DB, env.PORTFOLIO_CONTENT_URL));
     await stage("feedList", () => syncFeedList(env.DB, env.CURATED_OPML_URL, env.PORTFOLIO_HOST));
     await stage("feeds", () => ingestFeeds(env.DB));
+    if (env.AI && env.VECTORIZE) {
+      const [ai, index] = [env.AI, env.VECTORIZE];
+      await stage("embed", () => embedPending(env.DB, ai, index));
+    }
     console.log("ingest", JSON.stringify(report, (k, v) => (k === "changedIds" ? v.length : v)));
   },
 } satisfies ExportedHandler<Env>;

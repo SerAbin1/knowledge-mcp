@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Env } from "./env";
-import { ftsSearch } from "./search/fts";
+import { hybridSearch } from "./search/hybrid";
 import { getDocument, listDocuments, listSources } from "./store";
 
 const json = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }] });
@@ -45,7 +45,7 @@ export function createServer(env: Env): McpServer {
       annotations: { readOnlyHint: true },
     },
     async ({ query }) => {
-      const hits = await ftsSearch(env.DB, query, 10);
+      const { hits } = await hybridSearch(env, query, 10);
       const results = [];
       for (const hit of hits) {
         const doc = await getDocument(env.DB, hit.documentId);

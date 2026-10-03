@@ -24,3 +24,16 @@ binding = "DB"
 database_name = "knowledge-mcp"
 database_id = "local-only-until-first-deploy"
 migrations_dir = "migrations"
+
+# Semantic search: Workers AI makes the embeddings, Vectorize stores and
+# searches them. Neither has a local emulator (in `wrangler dev` they call
+# your Cloudflare account), so they're off until deploy and search runs
+# keyword-only. To enable:
+#   wrangler vectorize create knowledge-mcp --dimensions=768 --metric=cosine
+# then uncomment both blocks. The next cron runs backfill every chunk.
+# [ai]
+# binding = "AI"
+#
+# [[vectorize]]
+# binding = "VECTORIZE"
+# index_name = "knowledge-mcp"
