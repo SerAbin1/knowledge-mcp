@@ -108,6 +108,22 @@ describe("http endpoint", () => {
     expect(body.result.tools.map((t) => t.name)).toContain("search");
   });
 
+  it("answers CORS preflight and adds CORS headers for browser clients", async () => {
+    const preflight = await worker.fetch(new Request("http://localhost/mcp", { method: "OPTIONS" }), env);
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-headers")).toContain("mcp-protocol-version");
+
+    const res = await worker.fetch(
+      new Request("http://localhost/mcp", {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+      }),
+      env,
+    );
+    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+  });
+
   it("404s outside /mcp", async () => {
     const res = await worker.fetch(new Request("http://localhost/"), env);
     expect(res.status).toBe(404);

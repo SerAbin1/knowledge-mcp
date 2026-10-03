@@ -5,12 +5,29 @@ import { ingestPortfolio } from "./ingest/portfolio";
 import { embedPending } from "./search/embed";
 import { createServer } from "./server";
 
+// Browser-based MCP clients (e.g. the MCP Inspector's web UI) call the server
+// cross-origin. ChatGPT and Claude call it server-side and don't need this.
+// Everything here is public and read-only, so any origin is fine.
+const CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept, authorization, mcp-protocol-version, mcp-session-id, last-event-id",
+  "access-control-expose-headers": "mcp-session-id, mcp-protocol-version",
+};
+
+function withCors(res: Response): Response {
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(CORS)) out.headers.set(k, v);
+  return out;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname !== "/mcp") {
       return new Response("knowledge-mcp: MCP endpoint is at /mcp\n", { status: 404 });
     }
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
     // Stateless mode: no session id, a fresh server + transport per request.
     // Workers isolates don't keep memory between requests, and none of our
@@ -21,7 +38,7 @@ export default {
     });
     const server = createServer(env);
     await server.connect(transport);
-    return transport.handleRequest(request);
+    return withCors(await transport.handleRequest(request));
   },
 
   // Cron trigger (see wrangler.toml): refreshes the index from the sources.
