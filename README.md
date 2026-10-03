@@ -37,3 +37,13 @@ The endpoint is `https://knowledge-mcp.<your-subdomain>.workers.dev/mcp`. It's p
 - **Claude.ai:** Settings → Connectors → Add custom connector → paste the URL.
 - **Claude Code:** `claude mcp add --transport http knowledge <url>`
 - **MCP Inspector:** `pnpm dlx @modelcontextprotocol/inspector` (web UI), or `pnpm dlx @modelcontextprotocol/inspector --cli <url> --transport http --method tools/list`
+
+## Evals
+
+`pnpm eval [url]` runs `evals/questions.json` through `search` and reports recall@5 and MRR, split into keyword-style and paraphrased questions. Run it before and after any change to chunking or ranking.
+
+| | recall@5 | MRR |
+|---|---|---|
+| keyword-only, baseline | 0.69 | 0.53 |
+| + source names indexed | 0.75 | 0.59 |
+| + embeddings (hybrid) | _run after deploy_ | |

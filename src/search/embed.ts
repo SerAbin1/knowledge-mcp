@@ -21,19 +21,19 @@ export async function embed(ai: Ai, texts: string[]): Promise<number[][]> {
   return out;
 }
 
-// What gets embedded for a chunk: the document title and section heading give
-// the vector context a bare paragraph lacks ("it", "this approach", ...).
-export const chunkEmbeddingText = (c: { title: string; heading: string | null; text: string }) =>
-  truncate([c.title, c.heading, c.text].filter(Boolean).join("\n"), MAX_CHARS);
+// What gets embedded for a chunk: the document title, source and section
+// heading give the vector context a bare paragraph lacks ("it", "this approach", ...).
+export const chunkEmbeddingText = (c: { title: string; source: string; heading: string | null; text: string }) =>
+  truncate([`${c.title} (${c.source})`, c.heading, c.text].filter(Boolean).join("\n"), MAX_CHARS);
 
 // Embeds chunks that don't have a vector yet and upserts them into Vectorize.
 // The vector id is the chunk id, so re-embedding a changed chunk overwrites
 // its old vector.
 export async function embedPending(db: D1Database, ai: Ai, index: Vectorize, limit = PER_RUN) {
   const { results } = await db
-    .prepare("SELECT c.id, c.document_id, c.title, c.heading, c.text, d.kind FROM chunk c JOIN document d ON d.id = c.document_id WHERE c.embedded = 0 LIMIT ?")
+    .prepare("SELECT c.id, c.document_id, c.title, c.source, c.heading, c.text, d.kind FROM chunk c JOIN document d ON d.id = c.document_id WHERE c.embedded = 0 LIMIT ?")
     .bind(limit)
-    .all<{ id: string; document_id: string; title: string; heading: string | null; text: string; kind: string }>();
+    .all<{ id: string; document_id: string; title: string; source: string; heading: string | null; text: string; kind: string }>();
   if (!results.length) return { embedded: 0 };
 
   const vectors = await embed(ai, results.map(chunkEmbeddingText));

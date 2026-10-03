@@ -80,8 +80,8 @@ export async function syncDocuments(db: D1Database, items: Item[]): Promise<stri
       db.prepare("DELETE FROM chunk WHERE document_id = ?").bind(id),
       ...chunks.map((c, idx) =>
         db
-          .prepare("INSERT INTO chunk (id, document_id, idx, title, heading, text) VALUES (?, ?, ?, ?, ?, ?)")
-          .bind(`${id}:${idx}`, id, idx, doc.title, c.heading, c.text),
+          .prepare("INSERT INTO chunk (id, document_id, idx, title, source, heading, text) VALUES (?, ?, ?, ?, ?, ?, ?)")
+          .bind(`${id}:${idx}`, id, idx, doc.title, doc.source, c.heading, c.text),
       ),
     ]),
   );

@@ -35,8 +35,8 @@ export async function loadArticleBody(db: D1Database, doc: DocumentRow): Promise
     db.prepare("DELETE FROM chunk WHERE document_id = ?").bind(doc.id),
     ...chunks.map((c, idx) =>
       db
-        .prepare("INSERT INTO chunk (id, document_id, idx, title, heading, text) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(`${doc.id}:${idx}`, doc.id, idx, doc.title, c.heading, c.text),
+        .prepare("INSERT INTO chunk (id, document_id, idx, title, source, heading, text) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        .bind(`${doc.id}:${idx}`, doc.id, idx, doc.title, doc.source, c.heading, c.text),
     ),
   ]);
   return body;

@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "d1:migrate": "wrangler d1 migrations apply knowledge-mcp --local",
-    "d1:migrate:remote": "wrangler d1 migrations apply knowledge-mcp --remote"
+    "d1:migrate:remote": "wrangler d1 migrations apply knowledge-mcp --remote",
+    "eval": "node evals/run.ts"
   },
   "packageManager": "pnpm@12.4.1",
   "dependencies": {

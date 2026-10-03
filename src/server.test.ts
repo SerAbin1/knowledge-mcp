@@ -129,3 +129,17 @@ describe("http endpoint", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("source names are searchable", () => {
+  it("finds a document by its source when the name isn't in the text", async () => {
+    const { syncDocuments } = await import("./store");
+    await syncDocuments(env.DB, [
+      {
+        doc: { kind: "article", source: "Mitchell Hashimoto", url: "https://mitchellh.com/ai", title: "My AI Adoption Journey", summary: "How I started.", body: null, publishedAt: null },
+        chunks: [{ heading: null, text: "How I started." }],
+      },
+    ]);
+    const { data } = await callJson("search", { query: "hashimoto" });
+    expect(data.results[0].url).toBe("https://mitchellh.com/ai");
+  });
+});

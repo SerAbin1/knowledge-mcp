@@ -39,7 +39,7 @@ describe("embedPending", () => {
 
     const index = env.VECTORIZE as ReturnType<typeof fakeVectorize>;
     expect([...index.vectors.keys()].every((id) => /^[0-9a-f]{32}:0$/.test(id))).toBe(true);
-    expect((env.AI as ReturnType<typeof fakeAi>).calls[0]).toContain("Building an LRU cache\nEviction policies explained.");
+    expect((env.AI as ReturnType<typeof fakeAi>).calls[0]).toContain("Building an LRU cache (test)\nEviction policies explained.");
   });
 
   it("re-embeds a document whose content changed", async () => {

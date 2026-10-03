@@ -46,7 +46,7 @@ export function createServer(env: Env): McpServer {
       annotations: { readOnlyHint: true },
     },
     async ({ query }) => {
-      const { hits } = await hybridSearch(env, query, 10);
+      const { hits, mode } = await hybridSearch(env, query, 10);
       const results = [];
       for (const hit of hits) {
         const doc = await getDocument(env.DB, hit.documentId);
@@ -62,7 +62,7 @@ export function createServer(env: Env): McpServer {
           published: doc.published_at,
         });
       }
-      return json({ results });
+      return json({ results, mode });
     },
   );
 
