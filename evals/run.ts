@@ -9,15 +9,14 @@
 // "paraphrase" ones don't. That's where semantic search should earn its keep.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
 type Question = { q: string; expect: string; style: "keyword" | "paraphrase" };
 
 const url = process.argv[2] ?? "http://localhost:8787/mcp";
 const questions: Question[] = JSON.parse(readFileSync(join(import.meta.dirname, "questions.json"), "utf8"));
 
-const client = new Client({ name: "knowledge-mcp-eval", version: "0" });
+const client = new Client({ name: "knowledge-mcp-eval", version: "0" }, { versionNegotiation: { mode: "auto" } });
 await client.connect(new StreamableHTTPClientTransport(new URL(url)));
 
 const rows: (Question & { rank: number | null })[] = [];
@@ -29,6 +28,7 @@ for (const question of questions) {
   const i = data.results.slice(0, 5).findIndex((r) => r.url === question.expect);
   rows.push({ ...question, rank: i === -1 ? null : i + 1 });
 }
+const era = client.getProtocolEra();
 await client.close();
 
 const summarize = (rs: typeof rows) => ({
@@ -37,7 +37,7 @@ const summarize = (rs: typeof rows) => ({
   mrr: +(rs.reduce((s, r) => s + (r.rank ? 1 / r.rank : 0), 0) / rs.length).toFixed(2),
 });
 
-console.log(`search mode: ${mode}  (${url})\n`);
+console.log(`search mode: ${mode}, protocol era: ${era}  (${url})\n`);
 for (const r of rows) console.log(`${r.rank ? `#${r.rank}` : "--"}  [${r.style}] ${r.q}`);
 console.log();
 console.table({

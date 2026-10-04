@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { Env } from "../env";
-import { createServer } from "../server";
+import { callJson, connect } from "../test/client";
 import { ftsSearch } from "../search/fts";
 import { syncDocuments } from "../store";
 import { createTestDb } from "../test/d1";
@@ -43,12 +41,8 @@ function serve(response: () => Response) {
 }
 
 async function fetchTool(id: string) {
-  const [c, s] = InMemoryTransport.createLinkedPair();
-  await createServer(env).connect(s);
-  const client = new Client({ name: "t", version: "0" });
-  await client.connect(c);
-  const res = await client.callTool({ name: "fetch", arguments: { id } });
-  return JSON.parse((res.content as { text: string }[])[0].text);
+  const { data } = await callJson(await connect(env, "modern"), "fetch", { id });
+  return data;
 }
 
 describe("fetch tool on a feed article", () => {

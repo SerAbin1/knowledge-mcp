@@ -1,4 +1,4 @@
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import { createMcpHandler, type McpHttpHandler } from "@modelcontextprotocol/server";
 import type { Env } from "./env";
 import { ingestFeeds, syncFeedList } from "./ingest/feeds";
 import { ingestPortfolio } from "./ingest/portfolio";
@@ -10,10 +10,27 @@ import { createServer } from "./server";
 // Everything here is public and read-only, so any origin is fine.
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept, authorization, mcp-protocol-version, mcp-session-id, last-event-id",
-  "access-control-expose-headers": "mcp-session-id, mcp-protocol-version",
+  "access-control-allow-methods": "POST, OPTIONS",
+  // "*" rather than a list: 2026-07-28 adds standard headers (Mcp-Method,
+  // Mcp-Name) and per-tool Mcp-Param-* headers, and an allow-list would
+  // silently break browser clients whenever a new one appears.
+  "access-control-allow-headers": "*",
+  "access-control-expose-headers": "mcp-protocol-version",
 };
+
+// One MCP handler per Worker env (the factory needs env's bindings but only
+// receives the request context). It serves both protocol eras on one
+// endpoint: 2026-07-28 requests natively, and 2025-era clients through the
+// stateless legacy fallback, each with a fresh server per request.
+const handlers = new WeakMap<Env, McpHttpHandler>();
+function mcpHandler(env: Env): McpHttpHandler {
+  let handler = handlers.get(env);
+  if (!handler) {
+    handler = createMcpHandler(() => createServer(env), { onerror: (e) => console.error("mcp:", e) });
+    handlers.set(env, handler);
+  }
+  return handler;
+}
 
 function withCors(res: Response): Response {
   const out = new Response(res.body, res);
@@ -29,16 +46,7 @@ export default {
     }
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
-    // Stateless mode: no session id, a fresh server + transport per request.
-    // Workers isolates don't keep memory between requests, and none of our
-    // tools need conversation state, so there's nothing to persist.
-    const transport = new WebStandardStreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
-      enableJsonResponse: true,
-    });
-    const server = createServer(env);
-    await server.connect(transport);
-    return withCors(await transport.handleRequest(request));
+    return withCors(await mcpHandler(env).fetch(request));
   },
 
   // Cron trigger (see wrangler.toml): refreshes the index from the sources.

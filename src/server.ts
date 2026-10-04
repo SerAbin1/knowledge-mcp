@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import type { Env } from "./env";
 import { loadArticleBody } from "./fetch/article";
@@ -8,8 +8,8 @@ import { getDocument, listDocuments, listSources } from "./store";
 const json = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }] });
 
 // Builds the MCP server: the list of tools, resources and prompts an AI client
-// can discover and call. Kept separate from the HTTP wiring in index.ts so
-// tests can talk to it over an in-memory transport.
+// can discover and call. index.ts serves it over HTTP with a fresh instance
+// per request (the protocol is stateless as of 2026-07-28).
 //
 // `search` and `fetch` follow the shape ChatGPT expects for connectors and
 // deep research: search returns {results:[{id,title,url,...}]}, fetch takes one
@@ -22,17 +22,17 @@ export function createServer(env: Env): McpServer {
         "Searches Abin Biju's trusted sources: his own blog, projects and work experience, " +
         "plus articles from the blogs he follows. Call `search` first, then `fetch` the most " +
         "relevant ids to read them, and cite the URLs you used.",
+      // 2026-07-28 clients may cache list/read results. The tool, prompt and
+      // resource lists never change at runtime, so they're cacheable for a
+      // day; the profile changes when the portfolio is re-ingested (every 30
+      // minutes). Everything here is public, so shared caches may keep it.
+      cacheHints: {
+        "tools/list": { ttlMs: 86_400_000, cacheScope: "public" },
+        "prompts/list": { ttlMs: 86_400_000, cacheScope: "public" },
+        "resources/list": { ttlMs: 86_400_000, cacheScope: "public" },
+        "resources/read": { ttlMs: 1_800_000, cacheScope: "public" },
+      },
     },
-  );
-
-  server.registerTool(
-    "ping",
-    {
-      title: "Ping",
-      description: "Health check. Returns 'pong' so you can confirm the server is reachable.",
-      annotations: { readOnlyHint: true },
-    },
-    async () => ({ content: [{ type: "text", text: "pong" }] }),
   );
 
   server.registerTool(
@@ -42,7 +42,7 @@ export function createServer(env: Env): McpServer {
       description:
         "Search Abin Biju's blog posts, projects, work experience, and articles from blogs he trusts. " +
         "Returns the best-matching documents with a snippet. Use `fetch` with a result id to read the full text.",
-      inputSchema: { query: z.string().min(1).describe("What to look for, in natural language or keywords.") },
+      inputSchema: z.object({ query: z.string().min(1).describe("What to look for, in natural language or keywords.") }),
       annotations: { readOnlyHint: true },
     },
     async ({ query }) => {
@@ -71,7 +71,7 @@ export function createServer(env: Env): McpServer {
     {
       title: "Fetch a document",
       description: "Read the full text of a document returned by `search`, by its id.",
-      inputSchema: { id: z.string().min(1).describe("A document id from search results.") },
+      inputSchema: z.object({ id: z.string().min(1).describe("A document id from search results.") }),
       annotations: { readOnlyHint: true },
     },
     async ({ id }) => {
@@ -134,7 +134,7 @@ export function createServer(env: Env): McpServer {
     {
       title: "Answer from trusted sources",
       description: "Answer a question using only Abin's trusted sources, with citations.",
-      argsSchema: { question: z.string().describe("The question to answer.") },
+      argsSchema: z.object({ question: z.string().describe("The question to answer.") }),
     },
     ({ question }) => ({
       messages: [
