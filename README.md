@@ -31,7 +31,7 @@ The cron runs every 30 minutes. The first few runs pick up the 50 feeds 10 at a 
 
 ## Connect
 
-The endpoint is `https://knowledge-mcp.<your-subdomain>.workers.dev/mcp`. It's public and read-only, with no auth.
+The endpoint is `https://knowledge-mcp.abinyt1234.workers.dev/mcp`. It's public and read-only, with no auth.
 
 - **ChatGPT:** Settings → Apps & Connectors → Advanced → turn on Developer mode → Create. Paste the URL and pick "No authentication".
 - **Claude.ai:** Settings → Connectors → Add custom connector → paste the URL.
