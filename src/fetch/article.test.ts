@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import type { Env } from "../env";
 import { callJson, connect } from "../test/client";
 import { ftsSearch } from "../search/fts";
@@ -11,8 +11,10 @@ const page = `<!doctype html><html><head><title>Arenas | blog.dev</title></head>
   <nav><a href="/">Home</a> <a href="/about">About</a> Subscribe to the newsletter</nav>
   <article>
     <h1>Arena allocators</h1>
-    ${"<p>An arena allocator hands out memory from one big block and frees it all at once. " +
-      "That makes lifetimes simple and allocation a pointer bump.</p>".repeat(3)}
+    ${
+      "<p>An arena allocator hands out memory from one big block and frees it all at once. " +
+      "That makes lifetimes simple and allocation a pointer bump.</p>".repeat(3)
+    }
     <h2>When to use them</h2>
     <p>Per-request scratch memory in a server is the classic fit for a bump allocator.</p>
   </article>
@@ -25,7 +27,16 @@ beforeEach(async () => {
   env = { DB: createTestDb(), PORTFOLIO_CONTENT_URL: "", PORTFOLIO_HOST: "", CURATED_OPML_URL: "" };
   await syncDocuments(env.DB, [
     {
-      doc: { kind: "article", source: "blog.dev", url: ARTICLE_URL, title: "Arena allocators", summary: "Memory arenas.", body: null, publishedAt: null, feedUrl: "https://blog.dev/rss" },
+      doc: {
+        kind: "article",
+        source: "blog.dev",
+        url: ARTICLE_URL,
+        title: "Arena allocators",
+        summary: "Memory arenas.",
+        body: null,
+        publishedAt: null,
+        feedUrl: "https://blog.dev/rss",
+      },
       chunks: [{ heading: null, text: "Memory arenas." }],
     },
   ]);

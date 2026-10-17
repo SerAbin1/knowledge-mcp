@@ -1,22 +1,19 @@
 {
   "name": "knowledge-mcp",
-  "type": "module",
   "version": "0.0.1",
   "private": true,
-  "engines": {
-    "node": ">=22.12.0"
-  },
+  "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vp test run",
+    "test:watch": "vp test",
     "typecheck": "tsc --noEmit",
     "d1:migrate": "wrangler d1 migrations apply knowledge-mcp --local",
     "d1:migrate:remote": "wrangler d1 migrations apply knowledge-mcp --remote",
-    "eval": "node evals/run.ts"
+    "eval": "node evals/run.ts",
+    "prepare": "vp config"
   },
-  "packageManager": "pnpm@12.4.1",
   "dependencies": {
     "@modelcontextprotocol/server": "^2.3.0",
     "@mozilla/readability": "^0.6.0",
@@ -29,7 +26,19 @@
     "@modelcontextprotocol/client": "^2.3.0",
     "@types/node": "^26.6.4",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3",
+    "vite-plus": "catalog:",
     "wrangler": "^4.146.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.14.0",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.22.0",
+      "onFail": "download"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { parseFeed, parseOpml } from "./feed-parser";
 
 describe("parseFeed", () => {
@@ -30,7 +30,12 @@ describe("parseFeed", () => {
         publishedAt: "2026-09-28T10:00:00.000Z",
         summary: "Fast parsing with SIMD — really fast.",
       },
-      { title: "Only full content", link: "https://lemire.me/blog/full/", publishedAt: null, summary: "The whole post." },
+      {
+        title: "Only full content",
+        link: "https://lemire.me/blog/full/",
+        publishedAt: null,
+        summary: "The whole post.",
+      },
     ]);
   });
 
@@ -49,7 +54,12 @@ describe("parseFeed", () => {
       </feed>`);
     expect(feed.title).toBe("research!rsc");
     expect(feed.items).toEqual([
-      { title: "Go <3", link: "https://research.swtch.com/go", publishedAt: "2026-01-02T03:04:05.000Z", summary: "Why Go." },
+      {
+        title: "Go <3",
+        link: "https://research.swtch.com/go",
+        publishedAt: "2026-01-02T03:04:05.000Z",
+        summary: "Why Go.",
+      },
     ]);
   });
 

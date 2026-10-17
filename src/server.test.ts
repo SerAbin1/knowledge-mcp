@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vite-plus/test";
 import type { Env } from "./env";
 import worker from "./index";
 import { syncDocuments } from "./store";
@@ -23,27 +23,41 @@ describe.each(ERAS)("mcp server, %s protocol era", (era) => {
   });
 
   it("search finds the blog post about LRU caches", async () => {
-    const { data } = await callJson(await connect(env, era), "search", { query: "least recently used eviction" });
+    const { data } = await callJson(await connect(env, era), "search", {
+      query: "least recently used eviction",
+    });
     expect(data.results[0].url).toBe("https://serabin1.github.io/blogs/lru-lfu-cache/");
     expect(data.results[0]).toMatchObject({ kind: "blog", source: "serabin1.github.io" });
   });
 
   it("search matches stemmed words and survives FTS syntax in the query", async () => {
-    const { data } = await callJson(await connect(env, era), "search", { query: 'parsing "GT06" AND -tcp*' });
+    const { data } = await callJson(await connect(env, era), "search", {
+      query: 'parsing "GT06" AND -tcp*',
+    });
     expect(data.results.map((r: { url: string }) => r.url)).toContain(
       "https://serabin1.github.io/blogs/learn-rust-by-building-gt06-parser/",
     );
   });
 
   it("search finds projects and experience", async () => {
-    const { data } = await callJson(await connect(env, era), "search", { query: "Pumato campus food delivery" });
+    const { data } = await callJson(await connect(env, era), "search", {
+      query: "Pumato campus food delivery",
+    });
     expect(data.results[0]).toMatchObject({ kind: "project", title: "Project: Pumato" });
   });
 
   it("search finds a document by its source when the name isn't in the text", async () => {
     await syncDocuments(env.DB, [
       {
-        doc: { kind: "article", source: "Mitchell Hashimoto", url: "https://mitchellh.com/ai", title: "My AI Adoption Journey", summary: "How I started.", body: null, publishedAt: null },
+        doc: {
+          kind: "article",
+          source: "Mitchell Hashimoto",
+          url: "https://mitchellh.com/ai",
+          title: "My AI Adoption Journey",
+          summary: "How I started.",
+          body: null,
+          publishedAt: null,
+        },
         chunks: [{ heading: null, text: "How I started." }],
       },
     ]);
@@ -67,7 +81,9 @@ describe.each(ERAS)("mcp server, %s protocol era", (era) => {
 
   it("list_sources counts documents per source and kind", async () => {
     const { data } = await callJson(await connect(env, era), "list_sources");
-    expect(data.sources).toContainEqual(expect.objectContaining({ source: "serabin1.github.io", kind: "blog", documents: 5 }));
+    expect(data.sources).toContainEqual(
+      expect.objectContaining({ source: "serabin1.github.io", kind: "blog", documents: 5 }),
+    );
   });
 
   it("serves the profile resource", async () => {
@@ -78,7 +94,9 @@ describe.each(ERAS)("mcp server, %s protocol era", (era) => {
   });
 
   it("offers the answer prompt", async () => {
-    const prompt = await (await connect(env, era)).getPrompt({
+    const prompt = await (
+      await connect(env, era)
+    ).getPrompt({
       name: "answer_from_trusted_sources",
       arguments: { question: "What is keyd?" },
     });
@@ -91,7 +109,11 @@ describe("http endpoint", () => {
     worker.fetch(
       new Request("http://localhost/mcp", {
         method: "POST",
-        headers: { "content-type": "application/json", accept: "application/json, text/event-stream", ...headers },
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json, text/event-stream",
+          ...headers,
+        },
         body: JSON.stringify(body),
       }),
       env,
@@ -119,7 +141,10 @@ describe("http endpoint", () => {
   });
 
   it("answers CORS preflight and adds CORS headers for browser clients", async () => {
-    const preflight = await worker.fetch(new Request("http://localhost/mcp", { method: "OPTIONS" }), env);
+    const preflight = await worker.fetch(
+      new Request("http://localhost/mcp", { method: "OPTIONS" }),
+      env,
+    );
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get("access-control-allow-headers")).toBe("*");
 
