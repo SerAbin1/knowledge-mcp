@@ -55,13 +55,7 @@
         "Parser and stream decoder for the GT06 GPS tracker protocol over raw TCP",
         "Published on crates.io — 882 lines of Rust, MIT licensed"
       ],
-      "technologies": [
-        "Rust",
-        "TCP",
-        "Protocol Parser",
-        "GPS",
-        "crates.io"
-      ],
+      "technologies": ["Rust", "TCP", "Protocol Parser", "GPS", "crates.io"],
       "github": "https://github.com/SerAbin1/gt06",
       "demo": "https://crates.io/crates/gt06",
       "url": "https://serabin1.github.io/projects/"
@@ -72,13 +66,7 @@
         "Full-stack food delivery, laundry, and grocery platform serving 5,000+ campus students",
         "Runs entirely on free-tier infrastructure while serving 7k+ reads per day"
       ],
-      "technologies": [
-        "Next.js",
-        "Firebase",
-        "Firestore",
-        "JavaScript",
-        "Playwright"
-      ],
+      "technologies": ["Next.js", "Firebase", "Firestore", "JavaScript", "Playwright"],
       "github": "https://github.com/SerAbin1/pumato",
       "demo": "https://pumato.online",
       "url": "https://serabin1.github.io/projects/"
@@ -94,13 +82,7 @@
         "Building backend infrastructure for a bus tracking application",
         "Developing scalable APIs for real-time bus location and route data"
       ],
-      "technologies": [
-        "Node.js",
-        "Express.js",
-        "PostgreSQL",
-        "Docker",
-        "Real-time APIs"
-      ],
+      "technologies": ["Node.js", "Express.js", "PostgreSQL", "Docker", "Real-time APIs"],
       "url": "https://serabin1.github.io/work/"
     },
     {
@@ -112,14 +94,7 @@
         "Designed and developed full-stack applications for clients across various domains",
         "Delivered projects deployed via Firebase, Supabase, and Render"
       ],
-      "technologies": [
-        "React",
-        "Next.js",
-        "Node.js",
-        "Firebase",
-        "Supabase",
-        "Render"
-      ],
+      "technologies": ["React", "Next.js", "Node.js", "Firebase", "Supabase", "Render"],
       "url": "https://serabin1.github.io/work/"
     },
     {
@@ -131,14 +106,7 @@
         "Engineered a full-stack business management platform for invoicing and analytics",
         "Implemented secure Role Based Access Control (RBAC) and authentication systems"
       ],
-      "technologies": [
-        "Node.js",
-        "Express.js",
-        "React.js",
-        "PostgreSQL",
-        "RBAC",
-        "JWT"
-      ],
+      "technologies": ["Node.js", "Express.js", "React.js", "PostgreSQL", "RBAC", "JWT"],
       "url": "https://serabin1.github.io/work/"
     }
   ]

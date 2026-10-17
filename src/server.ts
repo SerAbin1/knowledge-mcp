@@ -5,7 +5,9 @@ import { loadArticleBody } from "./fetch/article";
 import { hybridSearch } from "./search/hybrid";
 import { getDocument, listDocuments, listSources } from "./store";
 
-const json = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }] });
+const json = (value: unknown) => ({
+  content: [{ type: "text" as const, text: JSON.stringify(value) }],
+});
 
 // Builds the MCP server: the list of tools, resources and prompts an AI client
 // can discover and call. index.ts serves it over HTTP with a fresh instance
@@ -42,7 +44,9 @@ export function createServer(env: Env): McpServer {
       description:
         "Search Abin Biju's blog posts, projects, work experience, and articles from blogs he trusts. " +
         "Returns the best-matching documents with a snippet. Use `fetch` with a result id to read the full text.",
-      inputSchema: z.object({ query: z.string().min(1).describe("What to look for, in natural language or keywords.") }),
+      inputSchema: z.object({
+        query: z.string().min(1).describe("What to look for, in natural language or keywords."),
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ query }) => {
@@ -71,7 +75,9 @@ export function createServer(env: Env): McpServer {
     {
       title: "Fetch a document",
       description: "Read the full text of a document returned by `search`, by its id.",
-      inputSchema: z.object({ id: z.string().min(1).describe("A document id from search results.") }),
+      inputSchema: z.object({
+        id: z.string().min(1).describe("A document id from search results."),
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ id }) => {
@@ -94,7 +100,12 @@ export function createServer(env: Env): McpServer {
         title: doc.title,
         url: doc.url,
         text: text ?? doc.summary ?? "",
-        metadata: { kind: doc.kind, source: doc.source, published: doc.published_at, ...(note && { note }) },
+        metadata: {
+          kind: doc.kind,
+          source: doc.source,
+          published: doc.published_at,
+          ...(note && { note }),
+        },
       });
     },
   );
@@ -103,7 +114,8 @@ export function createServer(env: Env): McpServer {
     "list_sources",
     {
       title: "List sources",
-      description: "List every source this server can answer from (sites and feeds) with document counts.",
+      description:
+        "List every source this server can answer from (sites and feeds) with document counts.",
       annotations: { readOnlyHint: true },
     },
     async () => json({ sources: await listSources(env.DB) }),

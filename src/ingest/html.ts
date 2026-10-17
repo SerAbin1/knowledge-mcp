@@ -1,4 +1,11 @@
-const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
 
 // Good-enough HTML → plain text for feed summaries: drops scripts/styles and
 // tags, decodes common entities, collapses whitespace. Not a full parser, and
@@ -10,7 +17,8 @@ export function htmlToText(html: string): string {
     .replace(/<[^>]+>/g, " ")
     .replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e: string) => {
       if (e[0] === "#") {
-        const code = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+        const code =
+          e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
         return Number.isFinite(code) ? String.fromCodePoint(code) : m;
       }
       return ENTITIES[e.toLowerCase()] ?? m;

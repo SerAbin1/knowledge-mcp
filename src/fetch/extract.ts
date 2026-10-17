@@ -7,7 +7,9 @@ import { htmlToText } from "../ingest/html";
 // which Workers doesn't have.
 export function extractArticle(html: string): string | null {
   const { document } = parseHTML(html);
-  const article = new Readability(document as unknown as ConstructorParameters<typeof Readability>[0]).parse();
+  const article = new Readability(
+    document as unknown as ConstructorParameters<typeof Readability>[0],
+  ).parse();
   const text = article?.content ? htmlToText(article.content) : "";
   return text.length > 200 ? text : null;
 }

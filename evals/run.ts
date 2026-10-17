@@ -14,16 +14,24 @@ import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/cli
 type Question = { q: string; expect: string; style: "keyword" | "paraphrase" };
 
 const url = process.argv[2] ?? "http://localhost:8787/mcp";
-const questions: Question[] = JSON.parse(readFileSync(join(import.meta.dirname, "questions.json"), "utf8"));
+const questions: Question[] = JSON.parse(
+  readFileSync(join(import.meta.dirname, "questions.json"), "utf8"),
+);
 
-const client = new Client({ name: "knowledge-mcp-eval", version: "0" }, { versionNegotiation: { mode: "auto" } });
+const client = new Client(
+  { name: "knowledge-mcp-eval", version: "0" },
+  { versionNegotiation: { mode: "auto" } },
+);
 await client.connect(new StreamableHTTPClientTransport(new URL(url)));
 
 const rows: (Question & { rank: number | null })[] = [];
 let mode = "";
 for (const question of questions) {
   const res = await client.callTool({ name: "search", arguments: { query: question.q } });
-  const data = JSON.parse((res.content as { text: string }[])[0].text) as { mode: string; results: { url: string }[] };
+  const data = JSON.parse((res.content as { text: string }[])[0].text) as {
+    mode: string;
+    results: { url: string }[];
+  };
   mode = data.mode;
   const i = data.results.slice(0, 5).findIndex((r) => r.url === question.expect);
   rows.push({ ...question, rank: i === -1 ? null : i + 1 });

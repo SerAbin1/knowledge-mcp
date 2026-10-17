@@ -49,7 +49,14 @@ export function parseFeed(xml: string): ParsedFeed {
       const title = htmlToText(text(item.title));
       const link = text(item.link) || text(item.guid);
       if (!title || !/^https?:/.test(link)) return [];
-      return [{ title, link, publishedAt: isoDate(text(item.pubDate) || text(item.date)), summary: summaryOf(item.description, item.encoded) }];
+      return [
+        {
+          title,
+          link,
+          publishedAt: isoDate(text(item.pubDate) || text(item.date)),
+          summary: summaryOf(item.description, item.encoded),
+        },
+      ];
     });
     return { title: text(channel.title) || null, items };
   }
@@ -60,7 +67,14 @@ export function parseFeed(xml: string): ParsedFeed {
       const title = htmlToText(text(entry.title));
       const link = alternateLink(entry.link as Node[] | undefined);
       if (!title || !link) return [];
-      return [{ title, link, publishedAt: isoDate(text(entry.published) || text(entry.updated)), summary: summaryOf(entry.summary, entry.content) }];
+      return [
+        {
+          title,
+          link,
+          publishedAt: isoDate(text(entry.published) || text(entry.updated)),
+          summary: summaryOf(entry.summary, entry.content),
+        },
+      ];
     });
     return { title: text(feed.title) || null, items };
   }

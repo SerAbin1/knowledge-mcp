@@ -17,7 +17,10 @@ type FeedRow = { url: string; title: string; etag: string | null; last_modified:
 // feeds (and their articles) that are no longer curated. Feeds pointing at
 // `skipHost` are skipped since that site is indexed in full elsewhere.
 export async function syncFeedList(db: D1Database, opmlUrl: string, skipHost: string) {
-  const res = await fetch(opmlUrl, { headers: { "user-agent": USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  const res = await fetch(opmlUrl, {
+    headers: { "user-agent": USER_AGENT },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
   if (!res.ok) throw new Error(`opml: GET ${opmlUrl} → ${res.status}`);
   const feeds = parseOpml(await res.text()).filter((f) => new URL(f.url).host !== skipHost);
 
@@ -43,7 +46,9 @@ export async function syncFeedList(db: D1Database, opmlUrl: string, skipHost: st
 // Refreshes the stalest feeds. Returns ids of new or changed articles.
 export async function ingestFeeds(db: D1Database, limit = FEEDS_PER_RUN) {
   const { results: feeds } = await db
-    .prepare("SELECT url, title, etag, last_modified FROM feed ORDER BY last_ingested_at IS NOT NULL, last_ingested_at LIMIT ?")
+    .prepare(
+      "SELECT url, title, etag, last_modified FROM feed ORDER BY last_ingested_at IS NOT NULL, last_ingested_at LIMIT ?",
+    )
     .bind(limit)
     .all<FeedRow>();
 
@@ -84,7 +89,14 @@ async function ingestFeed(db: D1Database, feed: FeedRow) {
       chunks: [{ heading: null, text: it.summary || it.title }],
     }));
     const changedIds = await syncDocuments(db, items);
-    await markIngested(db, feed.url, now, null, res.headers.get("etag"), res.headers.get("last-modified"));
+    await markIngested(
+      db,
+      feed.url,
+      now,
+      null,
+      res.headers.get("etag"),
+      res.headers.get("last-modified"),
+    );
     return { url: feed.url, error: null, changedIds };
   } catch (e) {
     // A broken feed is recorded and retried on its next turn; it must not
@@ -95,9 +107,18 @@ async function ingestFeed(db: D1Database, feed: FeedRow) {
   }
 }
 
-function markIngested(db: D1Database, url: string, at: string, error: string | null, etag: string | null, lastModified: string | null) {
+function markIngested(
+  db: D1Database,
+  url: string,
+  at: string,
+  error: string | null,
+  etag: string | null,
+  lastModified: string | null,
+) {
   return db
-    .prepare("UPDATE feed SET last_ingested_at = ?, last_error = ?, etag = ?, last_modified = ? WHERE url = ?")
+    .prepare(
+      "UPDATE feed SET last_ingested_at = ?, last_error = ?, etag = ?, last_modified = ? WHERE url = ?",
+    )
     .bind(at, error, etag, lastModified, url)
     .run();
 }

@@ -12,7 +12,11 @@ class Statement {
     readonly params: SQLInputValue[] = [],
   ) {}
   bind(...params: unknown[]) {
-    return new Statement(this.db, this.sql, params.map((p) => (p === undefined ? null : p)) as SQLInputValue[]);
+    return new Statement(
+      this.db,
+      this.sql,
+      params.map((p) => (p === undefined ? null : p)) as SQLInputValue[],
+    );
   }
   async first<T>(): Promise<T | null> {
     return (this.db.prepare(this.sql).get(...this.params) as T) ?? null;

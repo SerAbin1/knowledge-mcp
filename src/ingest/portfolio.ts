@@ -5,7 +5,14 @@ import { chunkMarkdown } from "./chunk";
 type PortfolioContent = {
   site: string;
   posts: { url: string; title: string; description: string; date: string; body: string }[];
-  projects: { title: string; description: string[]; technologies: string[]; github?: string; demo?: string; url: string }[];
+  projects: {
+    title: string;
+    description: string[];
+    technologies: string[];
+    github?: string;
+    demo?: string;
+    url: string;
+  }[];
   experience: {
     title: string;
     company: string;
@@ -17,12 +24,26 @@ type PortfolioContent = {
   }[];
 };
 
-const slug = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-|-$/g, "");
 
-export function portfolioDocuments(content: PortfolioContent): { doc: DocumentInput; markdown: string }[] {
+export function portfolioDocuments(
+  content: PortfolioContent,
+): { doc: DocumentInput; markdown: string }[] {
   const source = new URL(content.site).host;
   const posts = content.posts.map((p) => ({
-    doc: { kind: "blog" as const, source, url: p.url, title: p.title, summary: p.description, body: p.body, publishedAt: p.date },
+    doc: {
+      kind: "blog" as const,
+      source,
+      url: p.url,
+      title: p.title,
+      summary: p.description,
+      body: p.body,
+      publishedAt: p.date,
+    },
     markdown: `${p.description}\n\n${p.body}`,
   }));
   const projects = content.projects.map((p) => {
@@ -35,7 +56,15 @@ export function portfolioDocuments(content: PortfolioContent): { doc: DocumentIn
       .filter(Boolean)
       .join("\n");
     return {
-      doc: { kind: "project" as const, source, url: `${p.url}#${slug(p.title)}`, title: `Project: ${p.title}`, summary: p.description[0] ?? null, body, publishedAt: null },
+      doc: {
+        kind: "project" as const,
+        source,
+        url: `${p.url}#${slug(p.title)}`,
+        title: `Project: ${p.title}`,
+        summary: p.description[0] ?? null,
+        body,
+        publishedAt: null,
+      },
       markdown: body,
     };
   });
@@ -47,7 +76,15 @@ export function portfolioDocuments(content: PortfolioContent): { doc: DocumentIn
       `\nTechnologies: ${e.technologies.join(", ")}`,
     ].join("\n");
     return {
-      doc: { kind: "experience" as const, source, url: `${e.url}#${slug(`${e.company}-${e.title}`)}`, title, summary: e.description[0] ?? null, body, publishedAt: null },
+      doc: {
+        kind: "experience" as const,
+        source,
+        url: `${e.url}#${slug(`${e.company}-${e.title}`)}`,
+        title,
+        summary: e.description[0] ?? null,
+        body,
+        publishedAt: null,
+      },
       markdown: body,
     };
   });
@@ -63,6 +100,10 @@ export async function ingestPortfolio(db: D1Database, contentUrl: string) {
     db,
     items.map(({ doc, markdown }) => ({ doc, chunks: chunkMarkdown(markdown) })),
   );
-  const removed = await deleteMissing(db, ["blog", "project", "experience"], items.map((i) => i.doc.url));
+  const removed = await deleteMissing(
+    db,
+    ["blog", "project", "experience"],
+    items.map((i) => i.doc.url),
+  );
   return { total: items.length, changed: changed.length, removed, changedIds: changed };
 }

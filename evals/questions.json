@@ -1,18 +1,82 @@
 [
-  { "q": "How does keyd remap keys on Linux?", "expect": "https://serabin1.github.io/blogs/how-keyd-works/", "style": "keyword" },
-  { "q": "What is the difference between LRU and LFU caching?", "expect": "https://serabin1.github.io/blogs/lru-lfu-cache/", "style": "keyword" },
-  { "q": "Has Abin written a GPS tracker protocol parser?", "expect": "https://serabin1.github.io/blogs/learn-rust-by-building-gt06-parser/", "style": "keyword" },
-  { "q": "Which books does Abin recommend?", "expect": "https://serabin1.github.io/blogs/my-favourite-reads/", "style": "paraphrase" },
-  { "q": "How do you structure code so the business logic can be unit tested without a database?", "expect": "https://serabin1.github.io/blogs/hexagonal-architecture/", "style": "paraphrase" },
-  { "q": "What does Abin do at Evide?", "expect": "https://serabin1.github.io/work/#evide-ai-backend-developer-intern", "style": "keyword" },
-  { "q": "zig comptime tagged union", "expect": "https://mitchellh.com/writing/zig-comptime-tagged-union-subset", "style": "keyword" },
-  { "q": "Is null really a billion dollar mistake?", "expect": "https://www.gingerbill.org/article/2026/01/02/was-it-really-a-billion-dollar-mistake/", "style": "keyword" },
-  { "q": "What are the query, key and value matrices in attention?", "expect": "https://arpitbhayani.me/blogs/qkv-matrices", "style": "keyword" },
-  { "q": "Making retries safe so a request can be repeated without side effects", "expect": "https://www.slothbytes.dev/p/idempotency-for-dummies", "style": "paraphrase" },
-  { "q": "Feeling exhausted from working with AI coding agents all day", "expect": "https://0xsid.com/blog/agentic-coding-fatigue", "style": "paraphrase" },
-  { "q": "Why are npm security warnings mostly noise?", "expect": "https://overreacted.io/npm-audit-broken-by-design/", "style": "paraphrase" },
-  { "q": "How did Mitchell Hashimoto start using AI tools?", "expect": "https://mitchellh.com/writing/my-ai-adoption-journey", "style": "paraphrase" },
-  { "q": "Why choosing the right vector model matters for retrieval quality", "expect": "https://arpitbhayani.me/blogs/embedding-models-make-or-break-your-ai-app", "style": "paraphrase" },
-  { "q": "Using a JavaScript package in the browser without webpack or a bundler", "expect": "https://jvns.ca/blog/2024/11/18/how-to-import-a-javascript-library/", "style": "paraphrase" },
-  { "q": "Career growth by doing important work that doesn't get attention", "expect": "https://lalitm.com/software-engineering-outside-the-spotlight/", "style": "paraphrase" }
+  {
+    "q": "How does keyd remap keys on Linux?",
+    "expect": "https://serabin1.github.io/blogs/how-keyd-works/",
+    "style": "keyword"
+  },
+  {
+    "q": "What is the difference between LRU and LFU caching?",
+    "expect": "https://serabin1.github.io/blogs/lru-lfu-cache/",
+    "style": "keyword"
+  },
+  {
+    "q": "Has Abin written a GPS tracker protocol parser?",
+    "expect": "https://serabin1.github.io/blogs/learn-rust-by-building-gt06-parser/",
+    "style": "keyword"
+  },
+  {
+    "q": "Which books does Abin recommend?",
+    "expect": "https://serabin1.github.io/blogs/my-favourite-reads/",
+    "style": "paraphrase"
+  },
+  {
+    "q": "How do you structure code so the business logic can be unit tested without a database?",
+    "expect": "https://serabin1.github.io/blogs/hexagonal-architecture/",
+    "style": "paraphrase"
+  },
+  {
+    "q": "What does Abin do at Evide?",
+    "expect": "https://serabin1.github.io/work/#evide-ai-backend-developer-intern",
+    "style": "keyword"
+  },
+  {
+    "q": "zig comptime tagged union",
+    "expect": "https://mitchellh.com/writing/zig-comptime-tagged-union-subset",
+    "style": "keyword"
+  },
+  {
+    "q": "Is null really a billion dollar mistake?",
+    "expect": "https://www.gingerbill.org/article/2026/01/02/was-it-really-a-billion-dollar-mistake/",
+    "style": "keyword"
+  },
+  {
+    "q": "What are the query, key and value matrices in attention?",
+    "expect": "https://arpitbhayani.me/blogs/qkv-matrices",
+    "style": "keyword"
+  },
+  {
+    "q": "Making retries safe so a request can be repeated without side effects",
+    "expect": "https://www.slothbytes.dev/p/idempotency-for-dummies",
+    "style": "paraphrase"
+  },
+  {
+    "q": "Feeling exhausted from working with AI coding agents all day",
+    "expect": "https://0xsid.com/blog/agentic-coding-fatigue",
+    "style": "paraphrase"
+  },
+  {
+    "q": "Why are npm security warnings mostly noise?",
+    "expect": "https://overreacted.io/npm-audit-broken-by-design/",
+    "style": "paraphrase"
+  },
+  {
+    "q": "How did Mitchell Hashimoto start using AI tools?",
+    "expect": "https://mitchellh.com/writing/my-ai-adoption-journey",
+    "style": "paraphrase"
+  },
+  {
+    "q": "Why choosing the right vector model matters for retrieval quality",
+    "expect": "https://arpitbhayani.me/blogs/embedding-models-make-or-break-your-ai-app",
+    "style": "paraphrase"
+  },
+  {
+    "q": "Using a JavaScript package in the browser without webpack or a bundler",
+    "expect": "https://jvns.ca/blog/2024/11/18/how-to-import-a-javascript-library/",
+    "style": "paraphrase"
+  },
+  {
+    "q": "Career growth by doing important work that doesn't get attention",
+    "expect": "https://lalitm.com/software-engineering-outside-the-spotlight/",
+    "style": "paraphrase"
+  }
 ]

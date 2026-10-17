@@ -10,7 +10,10 @@ export async function seededEnv(): Promise<Env> {
   const DB = createTestDb();
   await syncDocuments(
     DB,
-    portfolioDocuments(portfolio).map(({ doc, markdown }) => ({ doc, chunks: chunkMarkdown(markdown) })),
+    portfolioDocuments(portfolio).map(({ doc, markdown }) => ({
+      doc,
+      chunks: chunkMarkdown(markdown),
+    })),
   );
   return {
     DB,

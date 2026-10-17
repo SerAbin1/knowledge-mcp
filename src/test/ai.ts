@@ -34,7 +34,9 @@ const cosine = (a: number[], b: number[]) => {
   return norm ? dot / norm : 0;
 };
 
-export function fakeVectorize(): Vectorize & { vectors: Map<string, { values: number[]; metadata?: unknown }> } {
+export function fakeVectorize(): Vectorize & {
+  vectors: Map<string, { values: number[]; metadata?: unknown }>;
+} {
   const vectors = new Map<string, { values: number[]; metadata?: unknown }>();
   return {
     vectors,

@@ -50,7 +50,9 @@ export async function syncDocuments(db: D1Database, items: Item[]): Promise<stri
   for (let i = 0; i < rows.length; i += MAX_PARAMS) {
     const ids = rows.slice(i, i + MAX_PARAMS).map((r) => r.id);
     const { results } = await db
-      .prepare(`SELECT id, content_hash FROM document WHERE id IN (${ids.map(() => "?").join(",")})`)
+      .prepare(
+        `SELECT id, content_hash FROM document WHERE id IN (${ids.map(() => "?").join(",")})`,
+      )
       .bind(...ids)
       .all<{ id: string; content_hash: string }>();
     for (const r of results) existing.set(r.id, r.content_hash);
@@ -76,11 +78,25 @@ export async function syncDocuments(db: D1Database, items: Item[]): Promise<stri
              published_at = excluded.published_at, content_hash = excluded.content_hash,
              updated_at = excluded.updated_at, feed_url = excluded.feed_url`,
         )
-        .bind(id, doc.kind, doc.source, doc.url, doc.title, doc.summary, doc.body, doc.publishedAt, hash, now, doc.feedUrl ?? null),
+        .bind(
+          id,
+          doc.kind,
+          doc.source,
+          doc.url,
+          doc.title,
+          doc.summary,
+          doc.body,
+          doc.publishedAt,
+          hash,
+          now,
+          doc.feedUrl ?? null,
+        ),
       db.prepare("DELETE FROM chunk WHERE document_id = ?").bind(id),
       ...chunks.map((c, idx) =>
         db
-          .prepare("INSERT INTO chunk (id, document_id, idx, title, source, heading, text) VALUES (?, ?, ?, ?, ?, ?, ?)")
+          .prepare(
+            "INSERT INTO chunk (id, document_id, idx, title, source, heading, text) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          )
           .bind(`${id}:${idx}`, id, idx, doc.title, doc.source, c.heading, c.text),
       ),
     ]),
@@ -90,7 +106,11 @@ export async function syncDocuments(db: D1Database, items: Item[]): Promise<stri
 
 // Removes documents of the given kinds whose URL is no longer published, e.g.
 // a deleted blog post. Returns how many were removed.
-export async function deleteMissing(db: D1Database, kinds: Kind[], keepUrls: string[]): Promise<number> {
+export async function deleteMissing(
+  db: D1Database,
+  kinds: Kind[],
+  keepUrls: string[],
+): Promise<number> {
   const rows = await db
     .prepare(`SELECT id, url FROM document WHERE kind IN (${kinds.map(() => "?").join(",")})`)
     .bind(...kinds)
@@ -105,7 +125,9 @@ export async function deleteMissing(db: D1Database, kinds: Kind[], keepUrls: str
 
 export async function getDocument(db: D1Database, id: string): Promise<DocumentRow | null> {
   return db
-    .prepare("SELECT id, kind, source, url, title, summary, body, published_at FROM document WHERE id = ?")
+    .prepare(
+      "SELECT id, kind, source, url, title, summary, body, published_at FROM document WHERE id = ?",
+    )
     .bind(id)
     .first<DocumentRow>();
 }
