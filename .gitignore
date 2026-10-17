@@ -1,7 +1,8 @@
 # dependencies
 node_modules/
 
-# wrangler local state (Miniflare sqlite from `wrangler dev`) and secrets
+# generated binding types, wrangler local state and secrets
+.cloudflare/
 .wrangler/
 .dev.vars
 .env

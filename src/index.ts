@@ -26,7 +26,9 @@ const handlers = new WeakMap<Env, McpHttpHandler>();
 function mcpHandler(env: Env): McpHttpHandler {
   let handler = handlers.get(env);
   if (!handler) {
-    handler = createMcpHandler(() => createServer(env), { onerror: (e) => console.error("mcp:", e) });
+    handler = createMcpHandler(() => createServer(env), {
+      onerror: (e) => console.error("mcp:", e),
+    });
     handlers.set(env, handler);
   }
   return handler;
@@ -49,7 +51,7 @@ export default {
     return withCors(await mcpHandler(env).fetch(request));
   },
 
-  // Cron trigger (see wrangler.toml): refreshes the index from the sources.
+  // Cron trigger (see cloudflare.config.ts): refreshes the index from the sources.
   // Stages run independently so one failing source doesn't block the others.
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
     const report: Record<string, unknown> = {};
@@ -67,6 +69,9 @@ export default {
       const [ai, index] = [env.AI, env.VECTORIZE];
       await stage("embed", () => embedPending(env.DB, ai, index));
     }
-    console.log("ingest", JSON.stringify(report, (k, v) => (k === "changedIds" ? v.length : v)));
+    console.log(
+      "ingest",
+      JSON.stringify(report, (k, v) => (k === "changedIds" ? v.length : v)),
+    );
   },
 } satisfies ExportedHandler<Env>;
