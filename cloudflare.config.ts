@@ -20,7 +20,9 @@ export default defineConfig({
     env: {
       PORTFOLIO_CONTENT_URL: bindings.text("https://serabin1.github.io/content.json"),
       PORTFOLIO_HOST: bindings.text("serabin1.github.io"),
-      CURATED_OPML_URL: bindings.text("https://my-rss-reader.pages.dev/curated-feeds.opml"),
+      CURATED_OPML_URL: bindings.text(
+        "https://my-rss-reader.serabin1.workers.dev/curated-feeds.opml",
+      ),
       // Documents, chunks and the FTS5 keyword index. Created with `cf d1
       // create`. The id is an identifier, not a secret, and is meant to be
       // committed. Migrations live in ./migrations, the `cf d1 migrations`
